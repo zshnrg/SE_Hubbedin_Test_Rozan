@@ -3,16 +3,19 @@ import bodyParser from 'body-parser';
 
 import router from './router.js';
 
+import { connectWithRetry } from './services/db.service.js';
+
+// Importing environment variables
 const app = express();
 app.use(bodyParser.json());
 
-
 // Router
-
 app.use('/', router);
 
-// Start the server
+// Connect to MongoDB
+connectWithRetry()
 
+// Start the server
 let port = process.env.PORT || 3000;
 
 const args = process.argv.slice(2);
