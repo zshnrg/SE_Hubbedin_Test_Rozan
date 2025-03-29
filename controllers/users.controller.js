@@ -1,6 +1,7 @@
 import User from "../models/users.model.js";
 
-import { getTimeZones } from "@vvo/tzdb";
+import { DateTime } from "luxon";
+import { scheduleEmail, cancelEmail } from "./agenda.controller.js";
 
 /**
  * Retrieve all users with pagination
@@ -145,7 +146,7 @@ export const createUser = async (req, res) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
     errors.push("Birthday must be in YYYY-MM-DD format");
   }
-  if (!getTimeZones().some(tz => tz.name === timezone)) {
+  if (!DateTime.now().setZone(timezone).isValid) {
     errors.push("Invalid timezone");
   }
   if (errors.length > 0) {
@@ -216,7 +217,7 @@ export const updateUser = async (req, res) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) {
     errors.push("Birthday must be in YYYY-MM-DD format");
   }
-  if (!getTimeZones().some(tz => tz.name === timezone)) {
+  if (!DateTime.now().setZone(timezone).isValid) {
     errors.push("Invalid timezone");
   }
   if (errors.length > 0) {
