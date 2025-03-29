@@ -17,8 +17,8 @@ export const getUsers = async (req, res) => {
   let { page, limit } = req.query;
   let { search } = req.query;
 
-  page = parseInt(page) || 1;
-  limit = parseInt(limit) || 10;
+  page = page ? parseInt(page) : 1;
+  limit = limit ? parseInt(limit) : 10;
 
   let errors = [];
 
@@ -179,7 +179,7 @@ export const createUser = async (req, res) => {
     })
     .catch(error => {
       if (error.code === 11000) {
-        return res.status(400).json({
+        return res.status(409).json({
           message: "Email already exists",
           errors: ["Email already exists"],
         });
@@ -243,6 +243,8 @@ export const updateUser = async (req, res) => {
 
   await User.findByIdAndUpdate(id, { name, email, birthday, timezone }, { new: true })
     .then(updatedUser => {
+
+      // If user not found, return 404
       if (!updatedUser) {
         return res.status(404).json({
           message: "User not found",
@@ -250,25 +252,19 @@ export const updateUser = async (req, res) => {
         });
       }
 
-      return updatedUser
-    })
-    .then(updatedUser => {
       // Cancel the previous birthday job if it exists
       cancelEmail(updatedUser.email);
-
+  
       // Schedule a new email job for the updated user's birthday at 9AM in the user's timezone
       const birthdayDate = DateTime.fromISO(birthday + "T09:00:00", { zone: timezone });
       const birthdayJobDate = birthdayDate.set({ year: DateTime.now().year }).toJSDate();
-
+  
       if (birthdayJobDate < DateTime.now().toJSDate()) {
         birthdayJobDate.setFullYear(birthdayJobDate.getFullYear() + 1);
       }
-
+  
       scheduleEmail(updatedUser.email, updatedUser.name, birthdayJobDate)
 
-      return updatedUser
-    })
-    .then(updatedUser => {
       return res.status(200).json({
         message: "User updated successfully",
         data: updatedUser,
