@@ -1,11 +1,23 @@
 import mongoose from "mongoose";
 import config from "../config/db.config.js";
 
+/**
+ * MongoDB connection service
+ * @module services/db.service
+ */
+
 const MAX_RETRIES = 5;
 const RETRY_DELAY = 5000; // 5 seconds
 
 let retries = 0;
 
+/**
+ * Connect to MongoDB with retry logic
+ * @function connectWithRetry
+ * @returns {Promise<void>} - A promise that resolves when the connection is successful
+ * @throws {Error} - Throws an error if the connection fails after max retries
+ * @description This function attempts to connect to MongoDB and retries if the connection fails.
+ */
 const connectWithRetry = async () => {
   console.log("MongoDB connection with retry");
   mongoose
