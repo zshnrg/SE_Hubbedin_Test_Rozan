@@ -40,4 +40,11 @@ const connectWithRetry = async () => {
     });
 }
 
-export { mongoose as db, connectWithRetry };
+const closeConnection = async () => {
+  if (mongoose.connection) {
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed");
+  }
+}
+
+export { mongoose as db, connectWithRetry, closeConnection };

@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 export default {
   HOST: process.env.MAIL_HOST || 'smtp.example.com',
   PORT: process.env.MAIL_PORT || 587,
