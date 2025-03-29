@@ -1,7 +1,7 @@
 import Agenda from "agenda";
 import config from "../config/db.config.js";
 
-import { sendMail } from "./mailer.service.js";
+import { sendBirthdayEmail } from "../controllers/mailer.controller.js";
 
 /*
  * Agenda service for scheduling and managing jobs
@@ -26,7 +26,8 @@ const agenda = new Agenda({
 agenda.define("send email", async (job) => {
   const { email, recipient } = job.attrs.data;
   try {
-    await sendMail(email, "Happy Birthday!", recipient);
+    await sendBirthdayEmail(email, "Happy Birthday!", recipient);
+    console.log(`Email sent to ${recipient} at ${new Date()}`);
   } catch (error) {
     console.error(`Failed to send email to ${recipient}:`, error);
   }
