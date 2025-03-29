@@ -156,25 +156,39 @@ export const createUser = async (req, res) => {
     });
   }
 
-  try {
-    const user = new User({ name, email, birthday, timezone });
-    await user.save();
-    return res.status(201).json({
-      message: "User created successfully",
-      data: user,
-    });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(400).json({
-        message: "Email already exists",
-        errors: ["Email already exists"],
+  const user = new User({ name, email, birthday, timezone });
+  user.save()
+    .then(savedUser => {
+      // Schedule email job for the user's birthday at 9AM in the user's timezone
+      const birthdayDate = DateTime.fromISO(birthday + " 09:00", { zone: timezone });
+      const birthdayJobDate = birthdayDate.set({ year: DateTime.now().year }).toJSDate();
+
+      if (birthdayJobDate < DateTime.now().toJSDate()) {
+        birthdayJobDate.setFullYear(birthdayJobDate.getFullYear() + 1);
+      }
+
+      scheduleEmail(email, name, birthdayJobDate)
+
+      return savedUser
+    })
+    .then(savedUser => {
+      return res.status(201).json({
+        message: "User created successfully",
+        data: savedUser,
       });
-    }
-    return res.status(500).json({
-      message: "Internal server error",
-      errors: [error.message],
+    })
+    .catch(error => {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          message: "Email already exists",
+          errors: ["Email already exists"],
+        });
+      }
+      return res.status(500).json({
+        message: "Internal server error",
+        errors: [error.message],
+      });
     });
-  }
 
 }
 
@@ -227,18 +241,51 @@ export const updateUser = async (req, res) => {
     });
   }
 
-  const user = await User.findByIdAndUpdate(id, { name, email, birthday, timezone }, { new: true });
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
-      errors: ["User not found"],
-    });
-  }
+  await User.findByIdAndUpdate(id, { name, email, birthday, timezone }, { new: true })
+    .then(updatedUser => {
+      if (!updatedUser) {
+        return res.status(404).json({
+          message: "User not found",
+          errors: ["User not found"],
+        });
+      }
 
-  return res.status(200).json({
-    message: "User updated successfully",
-    data: user,
-  });
+      return updatedUser
+    })
+    .then(updatedUser => {
+      // Cancel the previous birthday job if it exists
+      cancelEmail(updatedUser.email);
+
+      // Schedule a new email job for the updated user's birthday at 9AM in the user's timezone
+      const birthdayDate = DateTime.fromISO(birthday + "T09:00:00", { zone: timezone });
+      const birthdayJobDate = birthdayDate.set({ year: DateTime.now().year }).toJSDate();
+
+      if (birthdayJobDate < DateTime.now().toJSDate()) {
+        birthdayJobDate.setFullYear(birthdayJobDate.getFullYear() + 1);
+      }
+
+      scheduleEmail(updatedUser.email, updatedUser.name, birthdayJobDate)
+
+      return updatedUser
+    })
+    .then(updatedUser => {
+      return res.status(200).json({
+        message: "User updated successfully",
+        data: updatedUser,
+      });
+    })
+    .catch(error => {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          message: "Email already exists",
+          errors: ["Email already exists"],
+        });
+      }
+      return res.status(500).json({
+        message: "Internal server error",
+        errors: [error.message],
+      });
+    });
 }
 
 /**
