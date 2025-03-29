@@ -10,7 +10,13 @@ const app = express();
 app.use(bodyParser.json());
 
 // Router
-app.use('/', router);
+app.use('/api', router);
+app.use((req, res) => {
+  res.status(404).send({
+    message: 'Route not found',
+    errors: ['Route not found'],
+  });
+});
 
 // Connect to MongoDB
 connectWithRetry()
