@@ -7,9 +7,10 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "@vvo/tzdb": "^6.161.0",
+    "agenda": "^5.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "luxon": "^3.6.0",
     "mongoose": "^8.13.0"
   },
   "devDependencies": {
