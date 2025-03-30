@@ -42,7 +42,7 @@ The Birthday Reminder Service is a backend application designed to store user da
 ## API Endpoints
 
 
-**Default Response Body:**
+**Response Body Template:**
 ```ts
 {
    "data": Object,
@@ -160,8 +160,9 @@ The Birthday Reminder Service is a backend application designed to store user da
 - `timezone` (string, required): Must be a valid timezone.
 
 **Example Request:**
+
+`POST /api/users`
 ```json
-POST /api/users
 {
   "name": "Rozan Ghosani",
   "email": "ghosanirozan1@gmail.com",
@@ -226,8 +227,9 @@ POST /api/users
 - `timezone` (string, required): Must be a valid timezone.
 
 **Example Request:**
+
+`PUT /api/users/67e890b44ec4c1cbe5e62316`
 ```json
-PUT /api/users/67e890b44ec4c1cbe5e62316
 {
   "name": "Rozan Ghosani Updated",
   "email": "updatedemail@gmail.com",
@@ -283,6 +285,8 @@ PUT /api/users/67e890b44ec4c1cbe5e62316
 - **404 Not Found**: User not found.
 
 **Example Response:**
+
+`DELETE /api/users/67e890b44ec4c1cbe5e62316`
 ```json
 {
   "message": "User deleted successfully",
