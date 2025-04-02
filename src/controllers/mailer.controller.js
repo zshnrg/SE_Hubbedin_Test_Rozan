@@ -2,6 +2,8 @@ import { mailer } from '../services/mailer.service.js';
 import path from 'path';
 import fs from 'fs';
 
+import logger from '../utils/logger.js';
+
 // Path to the birthday email template
 const birthdayTemplatePath = path.join(path.dirname(new URL(import.meta.url).pathname), '../templates/birthday.template.html');
 
@@ -35,10 +37,9 @@ export const sendBirthdayEmail = async (to, subject, name) => {
   return new Promise((resolve, reject) => {
     mailer.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.error('Error sending email:', error);
+        logger.error(`Error sending email to ${to}: ${error.message}`);
         reject(new Error(`Failed to send email: ${error.message}`));
       } else {
-        console.log('Email sent:', info.response);
         resolve();
       }
     });

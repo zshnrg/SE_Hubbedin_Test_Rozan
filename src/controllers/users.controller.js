@@ -1,7 +1,9 @@
 import User from "../models/users.model.js";
 
 import { DateTime } from "luxon";
+
 import { scheduleBirthdayEmail, cancelBirthdayEmail } from "./agenda.controller.js";
+import logger from "../utils/logger.js";
 
 /**
  * Retrieve all users with pagination
@@ -179,6 +181,7 @@ export const createUser = async (req, res) => {
           errors: ["Email already exists"],
         });
       }
+      logger.error("Error creating user:", error);
       return res.status(500).json({
         message: "Internal server error",
         errors: [error.message],
@@ -267,6 +270,7 @@ export const updateUser = async (req, res) => {
           errors: ["Email already exists"],
         });
       }
+      logger.error("Error updating user:", error);
       return res.status(500).json({
         message: "Internal server error",
         errors: [error.message],

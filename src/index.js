@@ -2,6 +2,9 @@ import './config/env.config.js'
 import express from 'express';
 import bodyParser from 'body-parser';
 
+import morgan from 'morgan';
+import logger from './utils/logger.js'
+
 import router from './router.js';
 
 import { connectWithRetry } from './services/db.service.js';
@@ -9,6 +12,7 @@ import { connectWithRetry } from './services/db.service.js';
 // Importing environment variables
 const app = express();
 app.use(bodyParser.json());
+app.use(morgan("combined", { stream: { write: (message) => logger.info(message.trim()) } }));
 
 // Router
 app.use('/api', router);

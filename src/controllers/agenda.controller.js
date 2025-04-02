@@ -1,4 +1,5 @@
 import agenda from "../services/agenda.service.js";
+import logger from "../utils/logger.js";
 import { isLeapYear } from "../utils/date.js";
 
 /**
@@ -35,6 +36,7 @@ export const scheduleBirthdayEmail = async (email, recipient, birthday) => {
     });
     return job;
   } catch (error) {
+    logger.error(`Failed to schedule birthday email for ${recipient}:`, error);
     throw new Error(`Failed to schedule email: ${error.message}`);
   }
 }
@@ -54,6 +56,7 @@ export const cancelBirthdayEmail = async (email) => {
     await Promise.all(jobs.map(job => job.remove()));
     return jobs;
   } catch (error) {
+    logger.error(`Failed to cancel birthday email job for ${email}:`, error);
     throw new Error(`Failed to cancel email job: ${error.message}`);
   }
 }
