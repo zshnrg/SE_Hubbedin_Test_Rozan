@@ -1,4 +1,4 @@
-import { scheduleEmail, cancelEmail } from "../src/controllers/agenda.controller.js";
+import { scheduleBirthdayEmail, cancelBirthdayEmail } from "../src/controllers/agenda.controller.js";
 import agenda from "../src/services/agenda.service.js";
 import { connectWithRetry, closeConnection } from '../src/services/db.service.js';
 
@@ -18,14 +18,15 @@ describe("Agenda Controller", () => {
   });
 
   test("should schedule an email successfully", async () => {
-    const sendAt = new Date(Date.now() + 10000); // 10 sec in future
-    const job = await scheduleEmail("test@example.com", "John Doe", sendAt);
+    const birthday = new Date(Date.now() + 10000); // Schedule for 10 seconds in the future
+    const job = await scheduleBirthdayEmail("test@example.com", "John Doe", birthday);
 
     expect(job).toBeDefined();
-    expect(job.attrs.name).toBe("send email");
+    expect(job.attrs.name).toBe("send birthday");
     expect(job.attrs.data).toEqual({
       email: "test@example.com",
       recipient: "John Doe",
+      birthday: birthday
     });
 
     // Verify job exists in DB
@@ -34,10 +35,10 @@ describe("Agenda Controller", () => {
   });
 
   test("should cancel scheduled email job", async () => {
-    const sendAt = new Date(Date.now() + 10000);
-    await scheduleEmail("test@example.com", "John Doe", sendAt);
+    const birthday = new Date(Date.now() + 10000); // Schedule for 10 seconds in the future
+    await scheduleBirthdayEmail("test@example.com", "John Doe", birthday);
 
-    const canceledJobs = await cancelEmail("test@example.com");
+    const canceledJobs = await cancelBirthdayEmail("test@example.com");
     expect(canceledJobs).toHaveLength(1);
 
     // Verify no jobs exist after cancellation
@@ -46,7 +47,7 @@ describe("Agenda Controller", () => {
   });
 
   test("should return null if no job exists for email", async () => {
-    const result = await cancelEmail("nonexistent@example.com");
+    const result = await cancelBirthdayEmail("nonexistent@example.com");
     expect(result).toBeNull();
   });
 });
