@@ -1,17 +1,37 @@
 import agenda from "../services/agenda.service.js";
+import { isLeapYear } from "../utils/date.js";
 
 /**
- * Schedule an email job
+ * Schedule a birthday email job
  * @param {string} email - The email address to send the email to
  * @param {string} recipient - The name of the recipient
- * @param {Date} sendAt - The date and time to send the email
+ * @param {Date} birthday - The date and time to send the email
  * @returns {object} - The scheduled job
  */
-export const scheduleEmail = async (email, recipient, sendAt) => {
+
+export const scheduleBirthdayEmail = async (email, recipient, birthday) => {
+
+  // Check if the date is valid on leap year birthdays
+  const isLeapBirthday = ( isLeapYear(birthday.getFullYear()) ) && birthday.getDate() === 29 && birthday.getMonth() === 1;
+
+  // Set year to the current year
+  const birthdayDate = new Date( new Date(birthday).setFullYear( new Date(2028,4,5).getFullYear() ) )
+  if (birthdayDate < new Date(2028,4,5)) {
+    // If the birthday date is in the past, set it to next year
+    birthdayDate.setFullYear(birthdayDate.getFullYear() + 1);
+  }
+
+  // Check if the birthday date is valid on leap year birthdays
+  if (isLeapBirthday && !isLeapYear(birthdayDate.getFullYear())) {
+    birthdayDate.setMonth(1) // February
+    birthdayDate.setDate(28); // Set to February 28th
+  }
+
   try {
-    const job = await agenda.schedule(sendAt, "send email", {
+    const job = await agenda.schedule(birthdayDate, "send birthday", {
       email,
       recipient,
+      birthday
     });
     return job;
   } catch (error) {
@@ -20,14 +40,14 @@ export const scheduleEmail = async (email, recipient, sendAt) => {
 }
 
 /*
- * Cancel an email job
+ * Cancel a birthday  email job
  * @param {string} email - The email address to cancel the job for
  * @returns {object} - The canceled job
  */
-export const cancelEmail = async (email) => {
+export const cancelBirthdayEmail = async (email) => {
   try {
     // Delete all jobs for the given email
-    const jobs = await agenda.jobs({ "data.email": email });
+    const jobs = await agenda.jobs({ "name": "send birthday", "data.email": email });
     if (jobs.length === 0) {
       return null;
     }

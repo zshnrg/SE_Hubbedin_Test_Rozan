@@ -1,7 +1,7 @@
 import User from "../models/users.model.js";
 
 import { DateTime } from "luxon";
-import { scheduleEmail, cancelEmail } from "./agenda.controller.js";
+import { scheduleBirthdayEmail, cancelBirthdayEmail } from "./agenda.controller.js";
 
 /**
  * Retrieve all users with pagination
@@ -160,14 +160,9 @@ export const createUser = async (req, res) => {
   user.save()
     .then(savedUser => {
       // Schedule email job for the user's birthday at 9AM in the user's timezone
-      const birthdayDate = DateTime.fromISO(birthday + " 09:00", { zone: timezone });
-      const birthdayJobDate = birthdayDate.set({ year: DateTime.now().year }).toJSDate();
+      const birthdayDate = DateTime.fromISO(birthday + " 09:00", { zone: timezone }).toJSDate();
 
-      if (birthdayJobDate < DateTime.now().toJSDate()) {
-        birthdayJobDate.setFullYear(birthdayJobDate.getFullYear() + 1);
-      }
-
-      scheduleEmail(email, name, birthdayJobDate)
+      scheduleBirthdayEmail(email, name, birthdayDate)
 
       return savedUser
     })
@@ -253,17 +248,12 @@ export const updateUser = async (req, res) => {
       }
 
       // Cancel the previous birthday job if it exists
-      cancelEmail(updatedUser.email);
+      cancelBirthdayEmail(updatedUser.email);
   
       // Schedule a new email job for the updated user's birthday at 9AM in the user's timezone
-      const birthdayDate = DateTime.fromISO(birthday + "T09:00:00", { zone: timezone });
-      const birthdayJobDate = birthdayDate.set({ year: DateTime.now().year }).toJSDate();
+      const birthdayDate = DateTime.fromISO(birthday + "T09:00:00", { zone: timezone }).toJSDate();
   
-      if (birthdayJobDate < DateTime.now().toJSDate()) {
-        birthdayJobDate.setFullYear(birthdayJobDate.getFullYear() + 1);
-      }
-  
-      scheduleEmail(updatedUser.email, updatedUser.name, birthdayJobDate)
+      scheduleBirthdayEmail(updatedUser.email, updatedUser.name, birthdayDate)
 
       return res.status(200).json({
         message: "User updated successfully",
