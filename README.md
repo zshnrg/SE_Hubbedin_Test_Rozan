@@ -316,6 +316,11 @@ The Birthday Reminder Service is a backend application designed to store user da
 - Currently, the application only logs emails to the console (`console.log`) and does not send actual emails due to the limitations of the SMTP email configuration.
 
 ## Design Decisions
+
+### Use of `agenda.schedule` Over Cron-Based Jobs
+- The application uses `agenda.schedule` instead of cron-based jobs for scheduling tasks. This decision was made because `agenda.schedule` allows direct manipulation of the next schedule date. This flexibility is particularly useful for handling edge cases, such as leap years, where the next schedule date may need adjustments. In contrast, cron-based jobs automatically reschedule without providing an opportunity to validate or modify the reschedule date, requiring additional logic to handle such scenarios.
+- Directly manipulating the next schedule avoids creating a new schedule for each year, ensuring deduplication and preventing redundant job entries.
+
 ### Modular Architecture
 - The application follows a modular architecture to separate concerns into distinct layers such as controllers, services, models, and routes. This approach enhances maintainability and simplifies future development.
 
