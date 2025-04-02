@@ -23,7 +23,7 @@ export const sendBirthdayEmail = async (to, subject, name) => {
 
   let template = fs.readFileSync(birthdayTemplatePath, 'utf8');
   template = template.replace('{{ name }}', name);
-  template = template.replace('{{ year }}', new  Date().getFullYear());
+  template = template.replace('{{ year }}', new Date().getFullYear());
 
   const mailOptions = {
     from: process.env.MAIL_USER,
@@ -32,11 +32,15 @@ export const sendBirthdayEmail = async (to, subject, name) => {
     html: template,
   };
 
-  mailer.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
+  return new Promise((resolve, reject) => {
+    mailer.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        reject(new Error(`Failed to send email: ${error.message}`));
+      } else {
+        console.log('Email sent:', info.response);
+        resolve();
+      }
+    });
   });
-}
+};
